@@ -76,7 +76,7 @@
                                 <TextBox Text="{Binding Precision, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}" IsEnabled="{Binding IsAutoStepMode}"/>
                             </DockPanel>
                         </UniformGrid>
-                        <Button Content="Решить" HorizontalAlignment="Right" Width="130"/>
+                        <Button Content="Решить" HorizontalAlignment="Right" Width="130" Command="{Binding SolveCommand}"/>
                     </StackPanel>
                 </StackPanel>
                 <DockPanel Grid.Row="1">
@@ -86,15 +86,15 @@
                             <TextBlock Text="{Binding SelectedTask.DerivativeName}" Margin="5,0"/>
                         </StackPanel>
                         <UniformGrid Rows="1">
-                            <Button Content="Очистить" Margin="5"/>
-                            <Button Content="Показать" Margin="5"/>
+                            <Button Content="Очистить" Margin="5" Command="{Binding ClearPaintedSelectedKoshiTaskCommand}"/>
+                            <Button Content="Показать" Margin="5" Command="{Binding ShowSelectedTaskValuesCommand}"/>
                         </UniformGrid>
                     </StackPanel>
                     
-                    <DataGrid Width="390" Margin="0,5">
+                    <DataGrid Width="390" Margin="0,5" ItemsSource="{Binding SelectedFunctionPoints}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="x" MinWidth="80"/>
-                            <DataGridTextColumn Header="Значение" Width="*"/>
+                            <DataGridTextColumn Header="x" MinWidth="80" Binding="{Binding X}"/>
+                            <DataGridTextColumn Header="Значение" Width="*" Binding="{Binding Y}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
@@ -106,7 +106,8 @@
                             <Setter Property="Margin" Value="5"/>
                         </Style>
                     </UniformGrid.Resources>
-                    <Button Content="Отобразить выбранную"/>
+                    <Button Content="Отобразить выбранную" Command="{Binding PaintSelectedKoshiTaskCommand}"/>
+                    <Button Content="Стереть выбранную" Command="{Binding ClearPaintedSelectedKoshiTaskCommand}"/>
                     <Button Content="Отобразить все"/>
                     <Button Content="Очистить"/>
                 </UniformGrid>
@@ -115,6 +116,10 @@
                         <oxy:LinearAxis Position="Left"/>
                         <oxy:LinearAxis Position="Bottom"/>
                     </oxy:Plot.Axes>
+                    <oxy:LineSeries Title="Тест" ItemsSource="{Binding SelectedFunctionPoints}"
+                                        DataFieldX="X"
+                                        DataFieldY="Y"
+                                        Color="Red"/>
                 </oxy:Plot>
             </DockPanel>
         </Grid>

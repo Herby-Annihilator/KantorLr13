@@ -2,6 +2,7 @@
 using KantorLr13.Models.Data;
 using KantorLr13.Models.RungeKutt;
 using KantorLr13.ViewModels.Base;
+using org.mariuszgromada.math.mxparser;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,6 +23,10 @@ namespace KantorLr13.ViewModels
 			AddKoshiTaskToSystemCommand = new LambdaCommand(OnAddKoshiTaskToSystemCommandExecuted, CanAddKoshiTaskToSystemCommandExecute);
 			DeleteSelectedKoshiTaskCommand = new LambdaCommand(OnDeleteSelectedKoshiTaskCommandExecuted, CanDeleteSelectedKoshiTaskCommandExecute);
 			SelectStepModeCommand = new LambdaCommand(OnSelectStepModeCommandExecuted, CanSelectStepModeCommandExecute);
+			SolveCommand = new LambdaCommand(OnSolveCommandExecuted, CanSolveCommandExecute);
+			PaintSelectedKoshiTaskCommand = new LambdaCommand(OnPaintSelectedKoshiTaskCommandExecuted, CanPaintSelectedKoshiTaskCommandExecute);
+			ClearPaintedSelectedKoshiTaskCommand = new LambdaCommand(OnClearPaintedSelectedKoshiTaskCommandExecuted, CanClearPaintedSelectedKoshiTaskCommandExecute);
+			ShowSelectedTaskValuesCommand = new LambdaCommand(OnShowSelectedTaskValuesCommandExecuted, CanShowSelectedTaskValuesCommandExecute);
 		}
 		#region Properties
 		private bool _isFixedStepMode = true;
@@ -64,6 +69,9 @@ namespace KantorLr13.ViewModels
 
 		public ObservableCollection<KoshiTask> SystemOfDifferentialEquations { get; private set; } = new ObservableCollection<KoshiTask>();
 		public ObservableCollection<Point> SelectedFunctionPoints { get; private set; } = new ObservableCollection<Point>();
+
+		private List<Point>[] _functionsPoints;
+
 		#endregion
 
 		#region Commands
@@ -72,6 +80,7 @@ namespace KantorLr13.ViewModels
 		{
 			SystemOfDifferentialEquations.Clear();
 			SelectedTask = null;
+			Status = "Таблица очищена";
 		}
 		private bool CanClearSystemOfDifferentialEquationsCommandExecute(object p) => SystemOfDifferentialEquations.Count > 0;
 
@@ -79,6 +88,7 @@ namespace KantorLr13.ViewModels
 		private void OnAddKoshiTaskToSystemCommandExecuted(object p)
 		{
 			SystemOfDifferentialEquations.Add(new KoshiTask("", "", StartX, default));
+			Status = "Добавлено";
 		}
 		private bool CanAddKoshiTaskToSystemCommandExecute(object p) => true;
 
@@ -87,6 +97,8 @@ namespace KantorLr13.ViewModels
 		{
 			SystemOfDifferentialEquations.Remove(SelectedTask);
 			SelectedTask = null;
+			SelectedFunctionPoints.Clear();
+			Status = "Выбранное уравнение удалено";
 		}
 		private bool CanDeleteSelectedKoshiTaskCommandExecute(object p) => SelectedTask != null;
 
@@ -107,6 +119,112 @@ namespace KantorLr13.ViewModels
 			}
 		}
 		private bool CanSelectStepModeCommandExecute(object p) => true;
+
+		public ICommand SolveCommand { get; }
+		private void OnSolveCommandExecuted(object p)
+		{
+			try
+			{
+				if (_stepMode == StepMode.Fixed)
+				{
+					Function[] derivatives = new Function[SystemOfDifferentialEquations.Count];
+					double[] functionsStartConditions = new double[SystemOfDifferentialEquations.Count];
+					for (int i = 0; i < derivatives.Length; i++)
+					{
+						derivatives[i] = TaskToFunction(SystemOfDifferentialEquations[i]);
+						functionsStartConditions[i] = SystemOfDifferentialEquations[i].StartYCondition;
+					}
+					RungeKuttMethod method = new RungeKuttMethod();
+					_functionsPoints = method.GetSystemSolution(derivatives, StartX, EndX, functionsStartConditions, StepsCount);
+				}
+				else
+				{
+
+				}
+				Status = "Успешное решение";
+			}
+			catch(Exception e)
+			{
+				Status = $"Неудача. Причина: {e.Message}";
+			}
+		}
+		private bool CanSolveCommandExecute(object p)
+		{
+			bool ok = false;
+			if (_stepMode == StepMode.Fixed)
+			{
+				if (StepsCount > 0)
+					ok = true;
+			}
+			else
+			{
+				if (Precision > 0)
+					ok = true;
+			}
+			return ok && (SystemOfDifferentialEquations.Count > 0);
+		}
+
+		public ICommand PaintSelectedKoshiTaskCommand { get; }
+		private void OnPaintSelectedKoshiTaskCommandExecuted(object p)
+		{
+			try
+			{
+				int index = SystemOfDifferentialEquations.IndexOf(SelectedTask);
+				if (index > -1)
+				{
+					SelectedFunctionPoints.Clear();
+					for (int i = 0; i < _functionsPoints[index].Count; i++)
+					{
+						SelectedFunctionPoints.Add(_functionsPoints[index][i]);
+					}
+				}
+				Status = "Выбранная функция нарисована";
+			}
+			catch(Exception e)
+			{
+				Status = $"Неудача. Причина: {e.Message}";
+			}
+		}
+		private bool CanPaintSelectedKoshiTaskCommandExecute(object p) => SelectedTask != null && _functionsPoints != null && _functionsPoints.Length > 0;
+
+		public ICommand ClearPaintedSelectedKoshiTaskCommand { get; }
+		private void OnClearPaintedSelectedKoshiTaskCommandExecuted(object p)
+		{
+			SelectedFunctionPoints.Clear();
+			SelectedTask = null;
+			Status = "Выбранный график стерт";
+		}
+		private bool CanClearPaintedSelectedKoshiTaskCommandExecute(object p) => SelectedFunctionPoints.Count > 0;
+
+		public ICommand ShowSelectedTaskValuesCommand { get; }
+		private void OnShowSelectedTaskValuesCommandExecuted(object p)
+		{
+			try
+			{
+				int index = SystemOfDifferentialEquations.IndexOf(SelectedTask);
+				if (index > -1)
+				{
+					SelectedFunctionPoints.Clear();
+					for (int i = 0; i < _functionsPoints[index].Count; i++)
+					{
+						SelectedFunctionPoints.Add(_functionsPoints[index][i]);
+					}
+				}
+				Status = "Выбранная функция отображена";
+			}
+			catch(Exception e)
+			{
+				Status = $"Неудача. Причина: {e.Message}";
+			}
+		}
+		private bool CanShowSelectedTaskValuesCommandExecute(object p) => SelectedTask != null &&
+			_functionsPoints != null && _functionsPoints.Length > 0;
 		#endregion
+
+		private Function TaskToFunction(KoshiTask task)
+		{
+			Function f = new Function($"f(x, {task.DerivativeName.Replace("'", "")}) = {task.Expression.Replace(',', '.')}");
+			return f;
+		}
 	}
 }

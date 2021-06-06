@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using org.mariuszgromada.math.mxparser;
 using System.Text;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -10,7 +11,7 @@ namespace KantorLr13.Models.RungeKutt
 {
 	public class RungeKuttMethod
 	{
-		public List<Point>[] GetSystemSolution(Func<double, double, double>[] derivatives, double argumentStartCondition, double argumentEndCondition, double[] functionsStartConditions, int stepsCount)
+		public List<Point>[] GetSystemSolution(Function[] derivatives, double argumentStartCondition, double argumentEndCondition, double[] functionsStartConditions, int stepsCount)
 		{
 			CheckArguments(derivatives, argumentStartCondition, argumentEndCondition, functionsStartConditions);
 			List<Point>[] result = new List<Point>[functionsStartConditions.Length];
@@ -27,18 +28,18 @@ namespace KantorLr13.Models.RungeKutt
 				{
 					currentY = result[j][i].Y;
 					currentX = result[j][i].X;
-					k1 = h * derivatives[j].Invoke(currentX, currentY);
-					k2 = h * derivatives[j].Invoke(currentX + h / 2, currentY + k1 / 2);
-					k3 = h * derivatives[j].Invoke(currentX + h / 2, currentY + k2 / 2);
-					k4 = h * derivatives[j].Invoke(currentX + h, currentY + k3);
-					nextY = currentY + 1 / 6 * (k1 + 2 * k2 + 2 * k3 + k4);
+					k1 = h * derivatives[j].calculate(currentX, currentY);
+					k2 = h * derivatives[j].calculate(currentX + h / 2, currentY + k1 / 2);
+					k3 = h * derivatives[j].calculate(currentX + h / 2, currentY + k2 / 2);
+					k4 = h * derivatives[j].calculate(currentX + h, currentY + k3);
+					nextY = currentY + 1.0 / 6.0 * (k1 + 2 * k2 + 2 * k3 + k4);
 					result[j].Add(new Point(currentX + h, nextY));
 				}
 			}
 			return result;
 		}
 
-		private void CheckArguments(Func<double, double, double>[] derivatives, double argumentStartCondition, double argumentEndCondition, double[] functionsStartConditions)
+		private void CheckArguments(Function[] derivatives, double argumentStartCondition, double argumentEndCondition, double[] functionsStartConditions)
 		{
 			if (derivatives.Length != functionsStartConditions.Length)
 				throw new ArgumentException("Несоответствие размеров массива производных и массива начальных значений функций");
