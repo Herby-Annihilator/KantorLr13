@@ -63,17 +63,17 @@
                             <TextBox Margin="5,0" Width="75" Text="{Binding EndX, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
                         </StackPanel>
                         <UniformGrid Rows="1" Margin="0,5">
-                            <RadioButton Content="Фиксированный шаг" GroupName="StepVariant" IsChecked="True"/>
+                            <RadioButton Content="Фиксированный шаг" GroupName="StepVariant" IsChecked="True" Command="{Binding SelectStepModeCommand}" CommandParameter="Fixed"/>
                             <DockPanel>
                                 <TextBlock Text="Число шагов = "/>
-                                <TextBox Text="{Binding StepsCount, UpdateSourceTrigger=PropertyChanged, Converter={cv:StringToIntConverter}}"/>
+                                <TextBox Text="{Binding StepsCount, UpdateSourceTrigger=PropertyChanged, Converter={cv:StringToIntConverter}}" IsEnabled="{Binding IsFixedStepMode}"/>
                             </DockPanel>
                         </UniformGrid>
                         <UniformGrid Rows="1" Margin="0,5">
-                            <RadioButton Content="Автоматический шаг" GroupName="StepVariant"/>
+                            <RadioButton Content="Автоматический шаг" GroupName="StepVariant" Command="{Binding SelectStepModeCommand}" CommandParameter="Auto"/>
                             <DockPanel>
                                 <TextBlock Text="ε = "/>
-                                <TextBox Text="{Binding Precision, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                                <TextBox Text="{Binding Precision, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}" IsEnabled="{Binding IsAutoStepMode}"/>
                             </DockPanel>
                         </UniformGrid>
                         <Button Content="Решить" HorizontalAlignment="Right" Width="130"/>
