@@ -1,0 +1,122 @@
+﻿<Window x:Class="KantorLr13.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KantorLr13"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:cv="clr-namespace:KantorLr13.Infrastructure.Converters"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="587" Width="973"
+        DataContext="{Binding MainWindowModel, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserSortColumns" Value="False"/>
+            <Setter Property="AlternatingRowBackground" Value="Aquamarine"/>
+            <Setter Property="VerticalGridLinesBrush" Value="BlueViolet"/>
+            <Setter Property="GridLinesVisibility" Value="Vertical"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Close" Command="{StaticResource CloseWindowCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Help"/>
+        </Menu>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="{Binding Status}"/>
+        </StatusBar>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" Margin="5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="340"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Система дифференциальных уравнений" HorizontalAlignment="Center" Margin="0,5"/>
+                    <DataGrid MinHeight="170" Width="390" ItemsSource="{Binding SystemOfDifferentialEquations}" SelectedItem="{Binding SelectedTask}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="f'(x)" Binding="{Binding DerivativeName}"/>
+                            <DataGridTextColumn Header="Выражение" MinWidth="250" Binding="{Binding Expression}"/>
+                            <DataGridTextColumn Header="x0" Width="40" Binding="{Binding StartXCondition, Mode=TwoWay}"/>
+                            <DataGridTextColumn Header="f(x0)" Width="*" Binding="{Binding StartYCondition}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <UniformGrid Rows="1" Margin="0,5">
+                        <Button Content="Добавить уравнение" Margin="5" Command="{Binding AddKoshiTaskToSystemCommand}"/>
+                        <Button Content="Удалить выбранное" Margin="5" Command="{Binding DeleteSelectedKoshiTaskCommand}"/>
+                        <Button Content="Очистить" Margin="5" Command="{Binding ClearSystemOfDifferentialEquationsCommand}"/>
+                    </UniformGrid>
+                    <StackPanel Margin="0,5">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="От"/>
+                            <TextBox Margin="5,0" Width="75" Text="{Binding StartX, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                            <TextBlock Text="До" Margin="10,0"/>
+                            <TextBox Margin="5,0" Width="75" Text="{Binding EndX, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                        </StackPanel>
+                        <UniformGrid Rows="1" Margin="0,5">
+                            <RadioButton Content="Фиксированный шаг" GroupName="StepVariant" IsChecked="True"/>
+                            <DockPanel>
+                                <TextBlock Text="Число шагов = "/>
+                                <TextBox Text="{Binding StepsCount, UpdateSourceTrigger=PropertyChanged, Converter={cv:StringToIntConverter}}"/>
+                            </DockPanel>
+                        </UniformGrid>
+                        <UniformGrid Rows="1" Margin="0,5">
+                            <RadioButton Content="Автоматический шаг" GroupName="StepVariant"/>
+                            <DockPanel>
+                                <TextBlock Text="ε = "/>
+                                <TextBox Text="{Binding Precision, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                            </DockPanel>
+                        </UniformGrid>
+                        <Button Content="Решить" HorizontalAlignment="Right" Width="130"/>
+                    </StackPanel>
+                </StackPanel>
+                <DockPanel Grid.Row="1">
+                    <StackPanel DockPanel.Dock="Top">
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="Таблица значений функции"/>
+                            <TextBlock Text="{Binding SelectedTask.DerivativeName}" Margin="5,0"/>
+                        </StackPanel>
+                        <UniformGrid Rows="1">
+                            <Button Content="Очистить" Margin="5"/>
+                            <Button Content="Показать" Margin="5"/>
+                        </UniformGrid>
+                    </StackPanel>
+                    
+                    <DataGrid Width="390" Margin="0,5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="x" MinWidth="80"/>
+                            <DataGridTextColumn Header="Значение" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Grid>
+            <DockPanel Grid.Column="1">
+                <UniformGrid Rows="1" DockPanel.Dock="Bottom">
+                    <UniformGrid.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                    </UniformGrid.Resources>
+                    <Button Content="Отобразить выбранную"/>
+                    <Button Content="Отобразить все"/>
+                    <Button Content="Очистить"/>
+                </UniformGrid>
+                <oxy:Plot Grid.Column="1">
+                    <oxy:Plot.Axes>
+                        <oxy:LinearAxis Position="Left"/>
+                        <oxy:LinearAxis Position="Bottom"/>
+                    </oxy:Plot.Axes>
+                </oxy:Plot>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>
