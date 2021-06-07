@@ -223,7 +223,23 @@ namespace KantorLr13.ViewModels
 
 		private Function TaskToFunction(KoshiTask task)
 		{
-			Function f = new Function($"f(x, {task.DerivativeName.Replace("'", "")}) = {task.Expression.Replace(',', '.')}");
+			string functionArgs = "";
+			string lower;
+			char[] potencialArgs = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+			for (int i = 0; i < task.Expression.Length; i++)
+			{
+				lower = task.Expression.ToLower();
+				for (int j = 0; j < potencialArgs.Length; j++)
+				{
+					if (lower[i] == potencialArgs[j])
+					{
+						functionArgs += potencialArgs[j] + ", ";
+						break;
+					}
+				}
+			}
+			functionArgs = functionArgs.Remove(functionArgs.Length - 2);
+			Function f = new Function($"f({functionArgs}) = {task.Expression.Replace(',', '.')}");
 			return f;
 		}
 	}
