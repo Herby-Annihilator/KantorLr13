@@ -7,7 +7,7 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:cv="clr-namespace:KantorLr13.Infrastructure.Converters"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="587" Width="973"
+        Title="{Binding Title}" Height="587" Width="1187"
         DataContext="{Binding MainWindowModel, Source={StaticResource Locator}}">
     <Window.Resources>
         <Style TargetType="DataGrid">
@@ -34,6 +34,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" Margin="5,0">
                 <Grid.RowDefinitions>
@@ -120,7 +121,50 @@
                                         DataFieldX="X"
                                         DataFieldY="Y"
                                         Color="Red"/>
+                    <oxy:LineSeries Title="Проверочная функция" ItemsSource="{Binding RealFunctionPointsForGraph}"
+                                        DataFieldX="X"
+                                        DataFieldY="Y"
+                                        Color="BlueViolet"/>
                 </oxy:Plot>
+            </DockPanel>
+            <DockPanel Grid.Column="2" Width="250" Margin="0,5">
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Для проверки введите настоящую формулу" Margin="0,5"/>
+                    <TextBox Width="250" Margin="0,5" Text="{Binding RealFunctionExpression, UpdateSourceTrigger=PropertyChanged}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                        <TextBlock Text="От"/>
+                        <TextBox Margin="5,0" Width="75" Text="{Binding Left, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                        <TextBlock Text="До" Margin="10,0"/>
+                        <TextBox Margin="5,0" Width="75" Text="{Binding Right, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Шаг"/>
+                        <TextBox Width="100" Margin="5,0" Text="{Binding Step, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                    </StackPanel>
+                    <UniformGrid Rows="1" HorizontalAlignment="Right">
+                        <Button Content="Получить таблицу" HorizontalAlignment="Right" Margin="5" Command="{Binding ShowRealFunctionCommand}"/>
+                        <Button Content="Стереть таблицу" HorizontalAlignment="Right" Margin="5" Command="{Binding ClearRealFunctionTableCommand}"/>
+                    </UniformGrid>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Норма глобальной погрешности"/>
+                        <TextBox Margin="5,0" Width="63"/>
+                    </StackPanel>
+                    <UniformGrid Rows="1">
+                        <Button Content="Нарисовать график" Margin="5" Command="{Binding DrawRealFunctionCommand}"/>
+                        <Button Content="Стереть график" Margin="5" Command="{Binding ClearRealFunctionGraphCommand}"/>
+                    </UniformGrid>
+                </StackPanel>
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Таблица значений истинной функции" Margin="5"/>
+                    <DataGrid ItemsSource="{Binding RealFunctionPointsForTable}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="x" Width="80" Binding="{Binding X}"/>
+                            <DataGridTextColumn Header="Значение" Width="*" Binding="{Binding Y}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+                
             </DockPanel>
         </Grid>
     </DockPanel>

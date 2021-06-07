@@ -27,6 +27,10 @@ namespace KantorLr13.ViewModels
 			PaintSelectedKoshiTaskCommand = new LambdaCommand(OnPaintSelectedKoshiTaskCommandExecuted, CanPaintSelectedKoshiTaskCommandExecute);
 			ClearPaintedSelectedKoshiTaskCommand = new LambdaCommand(OnClearPaintedSelectedKoshiTaskCommandExecuted, CanClearPaintedSelectedKoshiTaskCommandExecute);
 			ShowSelectedTaskValuesCommand = new LambdaCommand(OnShowSelectedTaskValuesCommandExecuted, CanShowSelectedTaskValuesCommandExecute);
+			DrawRealFunctionCommand = new LambdaCommand(OnDrawRealFunctionCommandExecuted, CanDrawRealFunctionCommandExecute);
+			ClearRealFunctionGraphCommand = new LambdaCommand(OnClearRealFunctionGraphCommandExecuted, CanClearRealFunctionGraphCommandExecute);
+			ShowRealFunctionCommand = new LambdaCommand(OnShowRealFunctionCommandExecuted, CanShowRealFunctionCommandExecute);
+			ClearRealFunctionTableCommand = new LambdaCommand(OnClearRealFunctionTableCommandExecuted, CanClearRealFunctionTableCommandExecute);
 		}
 		#region Properties
 		private bool _isFixedStepMode = true;
@@ -72,6 +76,21 @@ namespace KantorLr13.ViewModels
 
 		private List<Point>[] _functionsPoints;
 
+
+		private string _realFunctionExpression;
+		public string RealFunctionExpression { get => _realFunctionExpression; set => Set(ref _realFunctionExpression, value); }
+
+		public ObservableCollection<Point> RealFunctionPointsForGraph { get; private set; } = new ObservableCollection<Point>();
+		public ObservableCollection<Point> RealFunctionPointsForTable { get; private set; } = new ObservableCollection<Point>();
+
+		private double _left;
+		public double Left { get => _left; set => Set(ref _left, value); }
+
+		private double _right;
+		public double Right { get => _right; set => Set(ref _right, value); }
+
+		private double _step;
+		public double Step { get => _step; set => Set(ref _step, value); }
 		#endregion
 
 		#region Commands
@@ -219,6 +238,63 @@ namespace KantorLr13.ViewModels
 		}
 		private bool CanShowSelectedTaskValuesCommandExecute(object p) => SelectedTask != null &&
 			_functionsPoints != null && _functionsPoints.Length > 0;
+
+
+		public ICommand DrawRealFunctionCommand { get; }
+		private void OnDrawRealFunctionCommandExecuted(object p)
+		{
+			try
+			{
+				Function f = new Function(RealFunctionExpression);
+				RealFunctionPointsForGraph.Clear();
+				for (double i = Left; i < Right; i += Step)
+				{
+					RealFunctionPointsForGraph.Add(new Point(i, f.calculate(i)));
+				}
+				Status = "График нарисован";
+			}
+			catch(Exception e)
+			{
+				Status = $"Неудача. Причина: {e.Message}";
+			}
+		}
+		private bool CanDrawRealFunctionCommandExecute(object p) => Left < Right && Step > 0;
+
+		public ICommand ClearRealFunctionGraphCommand { get; }
+		private void OnClearRealFunctionGraphCommandExecuted(object p)
+		{
+			RealFunctionPointsForGraph.Clear();
+			Status = "График стерт";
+		}
+		private bool CanClearRealFunctionGraphCommandExecute(object p) =>RealFunctionPointsForGraph.Count > 0;
+
+		public ICommand ShowRealFunctionCommand { get; }
+		private void OnShowRealFunctionCommandExecuted(object p)
+		{
+			try
+			{
+				Function f = new Function(RealFunctionExpression);
+				RealFunctionPointsForTable.Clear();
+				for (double i = Left; i < Right; i += Step)
+				{
+					RealFunctionPointsForTable.Add(new Point(i, f.calculate(i)));
+				}
+				Status = "Таблица получена";
+			}
+			catch(Exception e)
+			{
+				Status = $"Неудача. Причина: {e.Message}";
+			}
+		}
+		private bool CanShowRealFunctionCommandExecute(object p) => Left < Right && Step > 0;
+
+		public ICommand ClearRealFunctionTableCommand { get; }
+		private void OnClearRealFunctionTableCommandExecuted(object p)
+		{
+			RealFunctionPointsForTable.Clear();
+			Status = "Таблица очищена";
+		}
+		private bool CanClearRealFunctionTableCommandExecute(object p) => RealFunctionPointsForTable.Count > 0;
 		#endregion
 
 		private Function TaskToFunction(KoshiTask task)
