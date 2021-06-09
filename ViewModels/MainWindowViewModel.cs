@@ -1,6 +1,7 @@
 ﻿using KantorLr13.Infrastructure.Commands;
 using KantorLr13.Models.Data;
 using KantorLr13.Models.RungeKutt;
+using KantorLr13.Models.Vectors;
 using KantorLr13.ViewModels.Base;
 using org.mariuszgromada.math.mxparser;
 using System;
@@ -146,15 +147,19 @@ namespace KantorLr13.ViewModels
 			{
 				if (_stepMode == StepMode.Fixed)
 				{
-					Function[] derivatives = new Function[SystemOfDifferentialEquations.Count];
-					double[] functionsStartConditions = new double[SystemOfDifferentialEquations.Count];
+					DerivativeFunction[] derivatives = new DerivativeFunction[SystemOfDifferentialEquations.Count];
+					Vector functionsStartConditions = new Vector(SystemOfDifferentialEquations.Count);
 					for (int i = 0; i < derivatives.Length; i++)
 					{
-						derivatives[i] = TaskToFunction(SystemOfDifferentialEquations[i]);
+						derivatives[i] = TaskToDerivativeFunction(SystemOfDifferentialEquations[i]);
 						functionsStartConditions[i] = SystemOfDifferentialEquations[i].StartYCondition;
 					}
+					GlobalVectorDerivativeFunction f = new GlobalVectorDerivativeFunction()
+					{
+						DerivativeFunctions = derivatives
+					};
 					RungeKuttMethod method = new RungeKuttMethod();
-					_functionsPoints = method.GetSystemSolution(derivatives, StartX, EndX, functionsStartConditions, StepsCount);
+					_functionsPoints = method.GetSystemSolution(f, StartX, EndX, functionsStartConditions, StepsCount);
 				}
 				else
 				{
@@ -297,11 +302,11 @@ namespace KantorLr13.ViewModels
 		private bool CanClearRealFunctionTableCommandExecute(object p) => RealFunctionPointsForTable.Count > 0;
 		#endregion
 
-		private Function TaskToFunction(KoshiTask task)
+		private DerivativeFunction TaskToDerivativeFunction(KoshiTask task)
 		{
 			string functionArgs = "";
 			string lower;
-			char[] potencialArgs = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+			char[] potencialArgs = { 'a', 'b', 'c', 'd', /*'e',*/ 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
 			for (int i = 0; i < task.Expression.Length; i++)
 			{
 				lower = task.Expression.ToLower();
@@ -315,8 +320,8 @@ namespace KantorLr13.ViewModels
 				}
 			}
 			functionArgs = functionArgs.Remove(functionArgs.Length - 2);
-			Function f = new Function($"f({functionArgs}) = {task.Expression.Replace(',', '.')}");
-			return f;
+			DerivativeFunction function = new DerivativeFunction($"f({functionArgs})", task.Expression);
+			return function;
 		}
 	}
 }

@@ -126,6 +126,7 @@
                                         DataFieldY="Y"
                                         Color="BlueViolet"/>
                 </oxy:Plot>
+                <!--<oxy:PlotView Grid.Column="1"/>-->
             </DockPanel>
             <DockPanel Grid.Column="2" Width="250" Margin="0,5">
                 <StackPanel DockPanel.Dock="Top">
