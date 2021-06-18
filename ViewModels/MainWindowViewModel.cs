@@ -145,25 +145,26 @@ namespace KantorLr13.ViewModels
 		{
 			try
 			{
-				if (_stepMode == StepMode.Fixed)
+				DerivativeFunction[] derivatives = new DerivativeFunction[SystemOfDifferentialEquations.Count];
+				Vector functionsStartConditions = new Vector(SystemOfDifferentialEquations.Count);
+				for (int i = 0; i < derivatives.Length; i++)
 				{
-					DerivativeFunction[] derivatives = new DerivativeFunction[SystemOfDifferentialEquations.Count];
-					Vector functionsStartConditions = new Vector(SystemOfDifferentialEquations.Count);
-					for (int i = 0; i < derivatives.Length; i++)
-					{
-						derivatives[i] = TaskToDerivativeFunction(SystemOfDifferentialEquations[i]);
-						functionsStartConditions[i] = SystemOfDifferentialEquations[i].StartYCondition;
-					}
-					GlobalVectorDerivativeFunction f = new GlobalVectorDerivativeFunction()
-					{
-						DerivativeFunctions = derivatives
-					};
+					derivatives[i] = TaskToDerivativeFunction(SystemOfDifferentialEquations[i]);
+					functionsStartConditions[i] = SystemOfDifferentialEquations[i].StartYCondition;
+				}
+				GlobalVectorDerivativeFunction f = new GlobalVectorDerivativeFunction()
+				{
+					DerivativeFunctions = derivatives
+				};
+				if (_stepMode == StepMode.Fixed)
+				{					
 					RungeKuttMethod method = new RungeKuttMethod();
 					_functionsPoints = method.GetSystemSolution(f, StartX, EndX, functionsStartConditions, StepsCount);
 				}
 				else
 				{
-
+					RungeKuttaFehlberMethod method = new RungeKuttaFehlberMethod();
+					_functionsPoints = method.GetSystemSolution(f, StartX, EndX, functionsStartConditions, Precision);
 				}
 				Status = "Успешное решение";
 			}

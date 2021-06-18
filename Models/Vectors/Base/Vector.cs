@@ -35,5 +35,7 @@ namespace KantorLr13.Models.Vectors.Base
 		}
 
 		public abstract object Clone();
+
+		public abstract T EuclideanNorm();
 	}
 }

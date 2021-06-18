@@ -8,13 +8,22 @@ namespace KantorLr13.Models.RungeKutt
 {
 	public class DerivativeFunction
 	{
-		public string FunctionName { get; set; }
-		public string Expression { get; set; }
+		public string FunctionName { get; private set; }
+		public string Expression { get; private set; }
+		private Function _function;
 
 		public DerivativeFunction(string functionName, string expression)
 		{
 			FunctionName = functionName;
 			Expression = expression;
+			_function = new Function($"{FunctionName} = {Expression.Replace(',', '.')}");
+		}
+
+		public void Refresh(string functionName, string expression)
+		{
+			FunctionName = functionName;
+			Expression = expression;
+			_function = new Function($"{FunctionName} = {Expression.Replace(',', '.')}");
 		}
 
 		public double Calculate(double x, Vector derivativeArgs)
@@ -25,8 +34,8 @@ namespace KantorLr13.Models.RungeKutt
 			{
 				args[i] = derivativeArgs[i - 1];
 			}
-			Function function = new Function($"{FunctionName} = {Expression.Replace(',', '.')}");
-			return function.calculate(args);
+			
+			return _function.calculate(args);
 		}
 	}
 }

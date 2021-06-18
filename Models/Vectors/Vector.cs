@@ -63,6 +63,17 @@ namespace KantorLr13.Models.Vectors
 		public override object Clone() => new Vector(this);
 
 		protected override Vector<double> DivideBy(double item) => MultiplyBy(1.0 / item);
+
+		public override double EuclideanNorm()
+		{
+			double sum = 0;
+			for (int i = 0; i < Length; i++)
+			{
+				sum += items[i] * items[i];
+			}
+			return Math.Sqrt(sum);
+		}
+
 		public static Vector operator /(Vector vector, double num) => (Vector)vector.DivideBy(num);
 	}
 }
