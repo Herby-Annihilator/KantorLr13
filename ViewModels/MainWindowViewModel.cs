@@ -7,6 +7,7 @@ using org.mariuszgromada.math.mxparser;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 using System.Windows.Input;
 using System.Windows.Markup;
@@ -87,11 +88,36 @@ namespace KantorLr13.ViewModels
 		private double _left;
 		public double Left { get => _left; set => Set(ref _left, value); }
 
+		private bool _isLeftEnable = true;
+		public bool IsLeftEnable { get => _isLeftEnable; set => Set(ref _isLeftEnable, value); }
+
 		private double _right;
 		public double Right { get => _right; set => Set(ref _right, value); }
 
+		private bool _isRightEnable = true;
+		public bool IsRightEnable { get => _isRightEnable; set => Set(ref _isRightEnable, value); }
+
 		private double _step;
 		public double Step { get => _step; set => Set(ref _step, value); }
+
+		private bool _isStepEnable = true;
+		public bool IsStepEnable { get => _isStepEnable; set => Set(ref _isStepEnable, value); }
+
+		private bool _useComparablePoints = false;
+		public bool UseComparablePoints 
+		{ 
+			get => _useComparablePoints;
+			set
+			{
+				IsLeftEnable = !value;
+				IsRightEnable = !value;
+				IsStepEnable = !value;
+				Set(ref _useComparablePoints, value);
+			}
+		}
+
+		private string _globalNorm = "";
+		public string GlobalNorm { get => _globalNorm; set => Set(ref _globalNorm, value); }
 		#endregion
 
 		#region Commands
@@ -251,12 +277,24 @@ namespace KantorLr13.ViewModels
 		{
 			try
 			{
+				GlobalNorm = "";
 				Function f = new Function(RealFunctionExpression);
 				RealFunctionPointsForGraph.Clear();
-				for (double i = Left; i < Right; i += Step)
+				if (UseComparablePoints)
 				{
-					RealFunctionPointsForGraph.Add(new Point(i, f.calculate(i)));
+					for (int i = 0; i < SelectedFunctionPoints.Count; i++)
+					{
+						RealFunctionPointsForGraph.Add(new Point(SelectedFunctionPoints[i].X, f.calculate(SelectedFunctionPoints[i].X)));
+					}
 				}
+				else
+				{
+					for (double i = Left; i < Right; i += Step)
+					{
+						RealFunctionPointsForGraph.Add(new Point(i, f.calculate(i)));
+					}
+				}
+				GlobalNorm = CalculateGlobalNorm().ToString();
 				Status = "График нарисован";
 			}
 			catch(Exception e)
@@ -264,7 +302,7 @@ namespace KantorLr13.ViewModels
 				Status = $"Неудача. Причина: {e.Message}";
 			}
 		}
-		private bool CanDrawRealFunctionCommandExecute(object p) => Left < Right && Step > 0;
+		private bool CanDrawRealFunctionCommandExecute(object p) => CanShowRealFunctionCommandExecute(p);
 
 		public ICommand ClearRealFunctionGraphCommand { get; }
 		private void OnClearRealFunctionGraphCommandExecuted(object p)
@@ -279,12 +317,24 @@ namespace KantorLr13.ViewModels
 		{
 			try
 			{
+				GlobalNorm = "";
 				Function f = new Function(RealFunctionExpression);
 				RealFunctionPointsForTable.Clear();
-				for (double i = Left; i < Right; i += Step)
+				if (UseComparablePoints)
 				{
-					RealFunctionPointsForTable.Add(new Point(i, f.calculate(i)));
+					for (int i = 0; i < SelectedFunctionPoints.Count; i++)
+					{
+						RealFunctionPointsForTable.Add(new Point(SelectedFunctionPoints[i].X, f.calculate(SelectedFunctionPoints[i].X)));
+					}
 				}
+				else
+				{
+					for (double i = Left; i < Right; i += Step)
+					{
+						RealFunctionPointsForTable.Add(new Point(i, f.calculate(i)));
+					}
+				}
+				GlobalNorm = CalculateGlobalNorm().ToString();
 				Status = "Таблица получена";
 			}
 			catch(Exception e)
@@ -292,7 +342,13 @@ namespace KantorLr13.ViewModels
 				Status = $"Неудача. Причина: {e.Message}";
 			}
 		}
-		private bool CanShowRealFunctionCommandExecute(object p) => Left < Right && Step > 0;
+		private bool CanShowRealFunctionCommandExecute(object p)
+		{
+			if (UseComparablePoints)
+				return SelectedFunctionPoints.Count > 0;
+			else
+				return Left < Right && Step > 0;
+		} 
 
 		public ICommand ClearRealFunctionTableCommand { get; }
 		private void OnClearRealFunctionTableCommandExecuted(object p)
@@ -323,6 +379,38 @@ namespace KantorLr13.ViewModels
 			functionArgs = functionArgs.Remove(functionArgs.Length - 2);
 			DerivativeFunction function = new DerivativeFunction($"f({functionArgs})", task.Expression);
 			return function;
+		}
+
+		private double CalculateGlobalNorm()
+		{
+			double[] sub;
+			int size;
+			if (RealFunctionPointsForGraph.Count > 0)
+			{
+				if (SelectedFunctionPoints.Count < RealFunctionPointsForGraph.Count)
+					size = SelectedFunctionPoints.Count;
+				else
+					size = RealFunctionPointsForGraph.Count;
+				sub = new double[size];
+				for (int i = 0; i < size; i++)
+				{
+					sub[i] = Math.Abs(SelectedFunctionPoints[i].Y - RealFunctionPointsForGraph[i].Y);
+				}
+			}
+			else
+			{
+				if (SelectedFunctionPoints.Count < RealFunctionPointsForTable.Count)
+					size = SelectedFunctionPoints.Count;
+				else
+					size = RealFunctionPointsForTable.Count;
+				sub = new double[size];
+				for (int i = 0; i < size; i++)
+				{
+					sub[i] = Math.Abs(SelectedFunctionPoints[i].Y - RealFunctionPointsForTable[i].Y);
+				}
+			}
+			double result = sub.Max();
+			return result;
 		}
 	}
 }

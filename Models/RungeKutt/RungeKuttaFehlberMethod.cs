@@ -61,23 +61,45 @@ namespace KantorLr13.Models.RungeKutt
 				k5 = f.Calculate(x + _A[4] * h, y + k1 * _B[3][0] + k2 * _B[3][1] + k3 * _B[3][2] + k4 * _B[3][3]) * h;
 				k6 = f.Calculate(x + _A[5] * h, y + k1 * _B[4][0] + k2 * _B[4][1] + k3 * _B[4][2] + k4 * _B[4][3] + k5 * _B[4][4]) * h;				
 
-				TE = k1 * _CT[0] + k2 * _CT[1] + k3 * _CT[2] + k4 * _CT[3] + k5 * _CT[4] + k6 * _CT[5];
-				norm = TE.EuclideanNorm();
-				h = 0.9 * h * Math.Pow(precision / norm, 1.0 / 5.0);
-				if (h > hmax)
-					h = hmax;
-				else if (h < hmin)
-					h = hmin;
-				if (norm <= precision)
+				TE = k1 * _CT[0] + k2 * _CT[1] + k3 * _CT[2] + k4 * _CT[3] + k5 * _CT[4] + k6 * _CT[5];  // разница между 4 и 5
+				norm = TE.EuclideanNorm();				
+				if (norm > (precision * 16))
+				{
+					h /= 2;
+				}
+				else if ((norm <= precision * 16) && norm > precision)
+				{
+					h /= 2;
+					h *= 0.9 * Math.Pow(precision / norm, 1.0 / 5.0);
+				}
+				if ((norm >= precision / 32) && norm <= precision)
+				{
+					//h = 0.9 * h * Math.Pow(precision / norm, 1.0 / 5.0);					
+					y += k1 * _CH[0] + k2 * _CH[1] + k3 * _CH[2] + k4 * _CH[3] + k5 * _CH[4] + k6 * _CH[5];
+					x += h;
+					if (x > argumentEndCondition)
+						x = argumentEndCondition;
+					for (int j = 0; j < result.Length; j++)
+					{
+						result[j].Add(new Point(x, y[j]));
+					}					
+				}
+				else if (norm < precision / 32)
 				{
 					y += k1 * _CH[0] + k2 * _CH[1] + k3 * _CH[2] + k4 * _CH[3] + k5 * _CH[4] + k6 * _CH[5];
 					x += h;
+					if (x > argumentEndCondition)
+						x = argumentEndCondition;
 					for (int j = 0; j < result.Length; j++)
 					{
 						result[j].Add(new Point(x, y[j]));
 					}
-					
+					h *= 2;
 				}
+				if (h > hmax)
+					h = hmax;
+				else if (h < hmin)
+					h = hmin;
 			}
 			return result;
 		}

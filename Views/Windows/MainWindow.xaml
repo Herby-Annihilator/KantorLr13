@@ -117,7 +117,7 @@
                         <oxy:LinearAxis Position="Left"/>
                         <oxy:LinearAxis Position="Bottom"/>
                     </oxy:Plot.Axes>
-                    <oxy:LineSeries Title="Тест" ItemsSource="{Binding SelectedFunctionPoints}"
+                    <oxy:LineSeries Title="График выбранной функции" ItemsSource="{Binding SelectedFunctionPoints}"
                                         DataFieldX="X"
                                         DataFieldY="Y"
                                         Color="Red"/>
@@ -134,24 +134,22 @@
                     <TextBox Width="250" Margin="0,5" Text="{Binding RealFunctionExpression, UpdateSourceTrigger=PropertyChanged}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
                         <TextBlock Text="От"/>
-                        <TextBox Margin="5,0" Width="75" Text="{Binding Left, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                        <TextBox Margin="5,0" Width="75" Text="{Binding Left, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}" IsEnabled="{Binding IsLeftEnable}"/>
                         <TextBlock Text="До" Margin="10,0"/>
-                        <TextBox Margin="5,0" Width="75" Text="{Binding Right, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                        <TextBox Margin="5,0" Width="75" Text="{Binding Right, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}" IsEnabled="{Binding IsRightEnable}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="Шаг"/>
-                        <TextBox Width="100" Margin="5,0" Text="{Binding Step, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}"/>
+                        <TextBox Width="100" Margin="5,0" Text="{Binding Step, UpdateSourceTrigger=PropertyChanged, Converter={cv:DoubleToStringConverter}}" IsEnabled="{Binding IsStepEnable}"/>
                     </StackPanel>
+                    <CheckBox Content="Использовать сопоставимые точки" Margin="0,5" IsChecked="{Binding UseComparablePoints, UpdateSourceTrigger=PropertyChanged}"/>
                     <UniformGrid Rows="1" HorizontalAlignment="Right">
                         <Button Content="Получить таблицу" HorizontalAlignment="Right" Margin="5" Command="{Binding ShowRealFunctionCommand}"/>
                         <Button Content="Стереть таблицу" HorizontalAlignment="Right" Margin="5" Command="{Binding ClearRealFunctionTableCommand}"/>
                     </UniformGrid>
-                    
-                    <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <TextBlock Text="Норма глобальной погрешности"/>
-                        <TextBox Margin="5,0" Width="63"/>
-                    </StackPanel>
-                    <UniformGrid Rows="1">
+                    <TextBlock Text="Норма глобальной погрешности" HorizontalAlignment="Center"/>
+                        <TextBox Margin="5,0"  Text="{Binding GlobalNorm, UpdateSourceTrigger=PropertyChanged}"/>
+                        <UniformGrid Rows="1">
                         <Button Content="Нарисовать график" Margin="5" Command="{Binding DrawRealFunctionCommand}"/>
                         <Button Content="Стереть график" Margin="5" Command="{Binding ClearRealFunctionGraphCommand}"/>
                     </UniformGrid>
