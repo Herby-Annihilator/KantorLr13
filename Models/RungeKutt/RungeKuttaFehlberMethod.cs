@@ -64,14 +64,19 @@ namespace KantorLr13.Models.RungeKutt
 				TE = k1 * _CT[0] + k2 * _CT[1] + k3 * _CT[2] + k4 * _CT[3] + k5 * _CT[4] + k6 * _CT[5];
 				norm = TE.EuclideanNorm();
 				h = 0.9 * h * Math.Pow(precision / norm, 1.0 / 5.0);
+				if (h > hmax)
+					h = hmax;
+				else if (h < hmin)
+					h = hmin;
 				if (norm <= precision)
 				{
 					y += k1 * _CH[0] + k2 * _CH[1] + k3 * _CH[2] + k4 * _CH[3] + k5 * _CH[4] + k6 * _CH[5];
+					x += h;
 					for (int j = 0; j < result.Length; j++)
 					{
 						result[j].Add(new Point(x, y[j]));
 					}
-					x += h;
+					
 				}
 			}
 			return result;
